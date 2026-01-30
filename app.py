@@ -47,8 +47,23 @@ def experience():
     if request.method == 'GET':
         return jsonify()
 
-    if request.method == 'POST':
-        return jsonify({})
+    if request.method == "POST":
+        request_body = request.get_json()
+        if not request_body:
+            return jsonify({"error": "Request must be JSON or include form data"}), 400
+
+        new_experience = Experience(
+            request_body["title"],
+            request_body["company"],
+            request_body["start_date"],
+            request_body["end_date"],
+            request_body["description"],
+        )
+        data["experience"].append(new_experience)
+
+        new_experience_id = len(data["experience"]) - 1
+
+        return jsonify({"message": "Experience added successfully ", "id": new_experience_id}), 201
 
     return jsonify({})
 
