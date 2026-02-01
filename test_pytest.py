@@ -72,3 +72,57 @@ def test_skill():
 
     response = app.test_client().get('/resume/skill')
     assert response.json[item_id] == example_skill
+
+
+def test_delete_experience():
+    '''
+    Test deleting an experience entry by index.
+    
+    Verifies that the experience is deleted and returns appropriate response.
+    '''
+    from app import data
+    
+    # Store initial count
+    initial_count = len(data['experience'])
+    
+    # Add a test experience entry using POST
+    example_experience = {
+        "title": "Test Developer",
+        "company": "Test Company",
+        "start_date": "January 2020",
+        "end_date": "December 2023",
+        "description": "Testing the delete functionality",
+        "logo": "test-logo.png"
+    }
+    app.test_client().post('/resume/experience', json=example_experience)
+    
+    # Get the index of the newly added experience (last item)
+    index_to_delete = len(data['experience']) - 1
+    
+    # Delete the experience
+    response = app.test_client().delete(f'/resume/experience/{index_to_delete}')
+    
+    # Check response
+    assert response.status_code == 200
+    assert response.json['message'] == 'Experience deleted successfully'
+    assert response.json['deleted']['title'] == 'Test Developer'
+    
+    # Verify the experience was actually removed
+    assert len(data['experience']) == initial_count
+
+
+def test_delete_experience_invalid_index():
+    '''
+    Test deleting an experience with an invalid index.
+    
+    Should return 404 error.
+    '''
+    from app import data
+    
+    # Try to delete with an index that doesn't exist
+    invalid_index = len(data['experience']) + 100
+    response = app.test_client().delete(f'/resume/experience/{invalid_index}')
+    
+    # Check that it returns 404
+    assert response.status_code == 404
+    assert response.json['error'] == 'Experience not found'
