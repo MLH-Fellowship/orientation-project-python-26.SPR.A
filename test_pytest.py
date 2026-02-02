@@ -72,3 +72,30 @@ def test_skill():
 
     response = app.test_client().get('/resume/skill')
     assert response.json[item_id] == example_skill
+
+
+def test_delete_skill():
+    '''
+    Test deleting a skill by its index position.
+    
+    Add a skill, delete it, and verify it was removed.
+    '''
+    # Add a new skill first
+    example_skill = {
+        "name": "TypeScript",
+        "proficiency": "1-2 years",
+        "logo": "example-logo.png"
+    }
+    
+    item_id = app.test_client().post('/resume/skill',
+                                     json=example_skill).json['id']
+    
+    # Delete the skill using its index
+    delete_response = app.test_client().delete('/resume/skill',
+                                               json={"id": item_id})
+    assert delete_response.status_code == 200
+    assert delete_response.json['message'] == "Skill deleted successfully"
+    
+    # Verify the skill was deleted by getting all skills
+    response = app.test_client().get('/resume/skill')
+    assert item_id not in response.json or response.json[item_id] != example_skill
