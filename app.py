@@ -2,7 +2,7 @@
 Flask Application
 '''
 from flask import Flask, jsonify, request
-from models import Experience, Education, Skill
+from models import Experience, Education, Skill, Contact
 
 app = Flask(__name__)
 
@@ -70,6 +70,19 @@ def education():
 def skill():
     '''
     Handles Skill requests
+    '''
+    if request.method == 'GET':
+        return jsonify({})
+
+    if request.method == 'POST':
+        return jsonify({})
+
+    return jsonify({})
+
+@app.route('/resume/contact', methods=['GET', 'POST'])
+def contact():
+    '''
+    Handles Contact requests
     '''
     if request.method == 'GET':
         return jsonify({})
