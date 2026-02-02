@@ -5,7 +5,7 @@ Models for the Resume API. Each class is related to
 '''
 
 from dataclasses import dataclass
-
+DEFAULT_LOGO = "default-logo.png"
 
 @dataclass
 class Experience:
@@ -17,7 +17,7 @@ class Experience:
     start_date: str
     end_date: str
     description: str
-    logo: str
+    logo: str = DEFAULT_LOGO
 
 
 @dataclass
