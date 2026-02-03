@@ -7,6 +7,21 @@ from models import Experience, Education, Skill
 
 app = Flask(__name__)
 
+########### Helper functions ###########
+def validate_email(email):
+    '''validate email'''
+    if re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+        return True
+    return False
+
+def validate_phone(phone):
+    '''validate phone number'''
+    if re.match(r'^\+[1-9]\d{7,14}$', phone):
+        return True
+    return False
+########################################
+
+
 data = {
     "experience": [
         Experience("Software Developer",
@@ -57,11 +72,10 @@ def user_info():
         if not all(key in body for key in required):
             return jsonify({"error": "Missing required fields"}), 400
 
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', request.json["email"]):
+        if not validate_email(body["email"]):
             return jsonify({"error": "Invalid email format"}), 400
 
-        phone = body["phone"]
-        if not phone.startswith('+') or phone.count('+') != 1:
+        if not validate_phone(body["phone"]):
             return jsonify({"error": "Invalid phone number format"}), 400
 
         data["personal_info"] = body
@@ -72,13 +86,11 @@ def user_info():
         if not body:
             return jsonify({"error": "Invalid JSON"}), 400
 
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', request.json["email"]):
+        if "email" in body and not validate_email(body["email"]):
             return jsonify({"error": "Invalid email format"}), 400
 
-        if "phone" in body:
-            phone = body["phone"]
-            if not phone.startswith('+') or phone.count('+') != 1:
-                return jsonify({"error": "Invalid phone number format"}), 400
+        if "phone" in body and not validate_phone(body["phone"]):
+            return jsonify({"error": "Invalid phone number format"}), 400
 
         data["personal_info"].update(body)
         return jsonify(data["personal_info"])
@@ -86,7 +98,8 @@ def user_info():
     if request.method == 'DELETE':
         data["personal_info"] = {}
         return jsonify({"message": "Personal info deleted"})
-    return 400
+
+    return jsonify({"error": "Method not allowed"}), 405
 
 @app.route('/resume/experience', methods=['GET', 'POST'])
 def experience():
