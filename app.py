@@ -89,8 +89,8 @@ def education():
                 request_body["end_date"],
                 request_body["grade"],
             )
-        except KeyError as e:
-            return jsonify({"error": "Missing required field: " + e.args[0]}), 400
+        except KeyError as missing:
+            return jsonify({"error": "Missing required field: " + missing.args[0]}), 400
 
         if "logo" in request_body:
             new_education.logo = request_body["logo"]
