@@ -30,7 +30,7 @@ class Education:
     start_date: str
     end_date: str
     grade: str
-    logo: str
+    logo: str = DEFAULT_LOGO
 
 
 @dataclass
