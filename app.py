@@ -192,7 +192,22 @@ def skill():
         return jsonify(skills_as_dicts)
 
     if request.method == 'POST':
-        return jsonify({})
+        request_body = request.get_json()
+        if not request_body:
+            return jsonify({"error": "Request must be JSON"}), 400
+
+        try:
+            new_skill = Skill(
+                request_body["name"],
+                request_body["proficiency"],
+                request_body["logo"]
+            )
+        except KeyError as missing:
+            return jsonify({"error": f"Missing field: {missing.args[0]}"}), 400
+
+        data["skill"].append(new_skill)
+        new_skill_id = len(data["skill"]) - 1
+        return jsonify({"message": "Skill added successfully", "id": new_skill_id}), 201
 
     if request.method == 'DELETE':
         index = request.json.get('id')
