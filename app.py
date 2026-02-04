@@ -78,7 +78,7 @@ def delete_experience(index):
             return jsonify({
                 'message': 'Experience deleted successfully',
                 'deleted': deleted_experience.__dict__
-            }), 200
+            }), 204
         return jsonify({'error': 'Experience not found'}), 404
     except IndexError:
         return jsonify({'error': 'Experience not found'}), 404
