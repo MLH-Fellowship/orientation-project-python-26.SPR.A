@@ -47,8 +47,23 @@ def experience():
     if request.method == 'GET':
         return jsonify()
 
-    if request.method == 'POST':
-        return jsonify({})
+    if request.method == "POST":
+        request_body = request.get_json()
+        if not request_body:
+            return jsonify({"error": "Request must be JSON or include form data"}), 400
+
+        new_experience = Experience(
+            request_body["title"],
+            request_body["company"],
+            request_body["start_date"],
+            request_body["end_date"],
+            request_body["description"],
+        )
+        data["experience"].append(new_experience)
+
+        new_experience_id = len(data["experience"]) - 1
+
+        return jsonify({"message": "Experience added successfully ", "id": new_experience_id}), 201
 
     return jsonify({})
 
@@ -82,7 +97,7 @@ def education():
     return jsonify({})
 
 
-@app.route('/resume/skill', methods=['GET', 'POST'])
+@app.route('/resume/skill', methods=['GET', 'POST', 'DELETE'])
 def skill():
     '''
     Handles Skill requests
@@ -92,5 +107,12 @@ def skill():
 
     if request.method == 'POST':
         return jsonify({})
+
+    if request.method == 'DELETE':
+        index = request.json.get('id')
+        if index is not None and 0 <= index < len(data['skill']):
+            deleted_skill = data['skill'].pop(index)
+            return jsonify({"message": "Skill deleted successfully"}), 204
+        return jsonify({"error": "Invalid skill ID"}), 400
 
     return jsonify({})
