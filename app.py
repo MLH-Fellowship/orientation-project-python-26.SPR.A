@@ -138,7 +138,30 @@ def education():
         return jsonify({})
 
     if request.method == 'POST':
-        return jsonify({})
+        request_body = request.get_json()
+
+        if not request_body:
+            return jsonify({"error": "Request must be valid JSON"}), 400
+
+        try:
+            new_education = Education(
+                request_body["course"],
+                request_body["school"],
+                request_body["start_date"],
+                request_body["end_date"],
+                request_body["grade"],
+            )
+        except KeyError as missing:
+            return jsonify({"error": "Missing required field: " + missing.args[0]}), 400
+
+        if "logo" in request_body:
+            new_education.logo = request_body["logo"]
+
+        data["education"].append(new_education)
+
+        new_education_id = len(data["education"]) - 1
+
+        return jsonify({"message": "Education added successfully ", "id": new_education_id}), 201
 
     return jsonify({})
 
