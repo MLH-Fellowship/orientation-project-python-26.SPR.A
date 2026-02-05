@@ -94,6 +94,42 @@ def test_skill():
     assert response.json[item_id] == example_skill
 
 
+def test_update_experience():
+    '''
+    Update an existing experience by index using PUT.
+    '''
+    client = app.test_client()
+
+    new_experience = {
+        "title": "Backend Developer",
+        "company": "Initial Company",
+        "start_date": "January 2024",
+        "end_date": "June 2024",
+        "description": "Building APIs"
+    }
+    item_id = client.post('/resume/experience', json=new_experience).json['id']
+
+    updated_experience = {
+        "id": item_id,
+        "title": "Senior Backend Developer",
+        "company": "Updated Company",
+        "start_date": "January 2024",
+        "end_date": "Present",
+        "description": "Building scalable APIs",
+        "logo": "updated-logo.png"
+    }
+
+    response = client.put('/resume/experience',
+                          json=updated_experience)
+
+    assert response.status_code == 200
+    expected_response = updated_experience.copy()
+    expected_response.pop("id")
+    assert response.json == expected_response
+
+    from app import data
+    assert data["experience"][item_id].__dict__ == expected_response
+
 def test_delete_education():
     '''
     Test deleting an education entry by index.

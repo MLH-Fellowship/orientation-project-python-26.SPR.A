@@ -101,7 +101,7 @@ def user_info():
 
     return jsonify({"error": "Method not allowed"}), 405
 
-@app.route('/resume/experience', methods=['GET', 'POST'])
+@app.route('/resume/experience', methods=['GET', 'POST', 'PUT'])
 def experience():
     '''
     Handle experience requests
@@ -126,6 +126,33 @@ def experience():
         new_experience_id = len(data["experience"]) - 1
 
         return jsonify({"message": "Experience added successfully ", "id": new_experience_id}), 201
+
+    if request.method == "PUT":
+        request_body = request.get_json()
+        if not request_body:
+            return jsonify({"error": "Request must be JSON"}), 400
+
+        if "id" not in request_body or not isinstance(request_body["id"], int):
+            return jsonify({"error": "Missing or invalid experience id"}), 400
+
+        index = request_body["id"]
+        if index < 0 or index >= len(data["experience"]):
+            return jsonify({"error": "Experience not found"}), 404
+
+        experience_item = data["experience"][index]
+        allowed_fields = ("title", "company", "start_date", "end_date",
+                          "description", "logo")
+
+        updated = False
+        for field in allowed_fields:
+            if field in request_body:
+                setattr(experience_item, field, request_body[field])
+                updated = True
+
+        if not updated:
+            return jsonify({"error": "No valid fields to update"}), 400
+
+        return jsonify(experience_item.__dict__), 200
 
     return jsonify({})
 
