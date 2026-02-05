@@ -181,7 +181,7 @@ def delete_education(index):
             return jsonify({
                 'message': 'Education deleted successfully',
                 'deleted': deleted_education.__dict__
-            }), 200
+            }), 204
         return jsonify({'error': 'Education not found'}), 404
     except IndexError:
         return jsonify({'error': 'Education not found'}), 404
