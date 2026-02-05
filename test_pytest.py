@@ -171,3 +171,43 @@ def test_delete_skill():
     # Verify the skill was deleted by getting all skills
     response = app.test_client().get('/resume/skill')
     assert item_id not in response.json or response.json[item_id] != example_skill
+
+
+def test_update_education():
+    '''
+    Update an existing education entry using its index as ID.
+
+    Confirms the PUT /resume/education route updates the stored entry.
+    '''
+    from app import data
+
+    client = app.test_client()
+
+    # Add a new education entry to update
+    original_education = {
+        "course": "Physics",
+        "school": "Test Institute",
+        "start_date": "January 2021",
+        "end_date": "December 2024",
+        "grade": "85%",
+        "logo": "physics-logo.png"
+    }
+    created = client.post('/resume/education', json=original_education).json
+    education_id = created['id']
+
+    # Perform the update
+    updated_fields = {
+        "id": education_id,
+        "course": "Astrophysics",
+        "grade": "95%"
+    }
+    update_response = client.put('/resume/education', json=updated_fields)
+
+    assert update_response.status_code == 200
+    assert update_response.json['message'] == "Education updated successfully"
+    assert update_response.json['updated']['course'] == "Astrophysics"
+    assert update_response.json['updated']['grade'] == "95%"
+
+    # Verify the in-memory data was updated
+    assert data["education"][education_id].course == "Astrophysics"
+    assert data["education"][education_id].grade == "95%"
