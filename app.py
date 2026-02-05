@@ -5,6 +5,7 @@ from dataclasses import asdict
 import re
 from flask import Flask, jsonify, request
 from models import Experience, Education, Skill
+from dataclasses import asdict
 
 app = Flask(__name__)
 
@@ -108,7 +109,7 @@ def experience():
     Handle experience requests
     '''
     if request.method == 'GET':
-        return jsonify()
+        return jsonify([asdict(exp) for exp in data["experience"]])
 
     if request.method == "POST":
         request_body = request.get_json()
@@ -130,6 +131,16 @@ def experience():
 
     return jsonify({})
 
+@app.route('/resume/experience/<int:exp_id>', methods=['GET'])
+def get_experience(exp_id):
+    '''
+    Return a specific experience by ID
+    '''
+    if exp_id < 0 or exp_id >= len(data["experience"]):
+        return jsonify({"error": "Experience not found"}), 404
+
+    return jsonify(asdict(data["experience"][exp_id]))
+
 @app.route('/resume/education', methods=['GET', 'POST'])
 def education():
     '''
@@ -143,8 +154,8 @@ def education():
                 return jsonify(asdict(data["education"][index]))
             
             return jsonify({"error": "Invalid education ID"}), 400
-        
-        return jsonify({})
+
+        return jsonify([asdict(education) for education in data["education"]])
 
     if request.method == 'POST':
         request_body = request.get_json()
@@ -191,12 +202,18 @@ def delete_education(index):
         return jsonify({'error': 'Education not found'}), 404
 
 
-@app.route('/resume/skill', methods=['GET', 'POST', 'DELETE'])
+@app.route('/resume/skill', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def skill():
     '''
     Handles Skill requests
     '''
     if request.method == 'GET':
+        index = request.args.get('id', type=int)
+        if index is not None:
+            if 0 <= index < len(data["skill"]):
+                return jsonify(data["skill"][index].__dict__)
+            return jsonify({"error": "Invalid skill ID"}), 400
+        
         skills_as_dicts = [skill.__dict__ for skill in data["skill"]]
         return jsonify(skills_as_dicts)
 
@@ -217,12 +234,35 @@ def skill():
         data["skill"].append(new_skill)
         new_skill_id = len(data["skill"]) - 1
         return jsonify({"message": "Skill added successfully", "id": new_skill_id}), 201
+    
+    if request.method == 'PUT':
+        request_body = request.get_json()
+        if not request_body:
+            return jsonify({"error": "Request must be JSON"}), 400
+
+        index = request_body.get("id")
+        if index is None or not isinstance(index, int) or not 0 <= index < len(data["skill"]):
+            return jsonify({"error": "Invalid skill ID"}), 400
+
+        existing_skill = data["skill"][index]
+        updated_skill = Skill(
+            request_body.get("name", existing_skill.name),
+            request_body.get("proficiency", existing_skill.proficiency),
+            request_body.get("logo", existing_skill.logo),
+        )
+        data["skill"][index] = updated_skill
+
+        return jsonify({
+            "message": "Skill updated successfully",
+            "id": index,
+            "skill": updated_skill.__dict__
+        }), 200
 
     if request.method == 'DELETE':
         index = request.json.get('id')
         if index is not None and 0 <= index < len(data['skill']):
             deleted_skill = data['skill'].pop(index)
-            return jsonify({"message": "Skill deleted successfully"}), 204
+            return jsonify({"message": "Skill deleted successfully"}), 200
         return jsonify({"error": "Invalid skill ID"}), 400
 
     return jsonify({})
