@@ -129,7 +129,7 @@ def experience():
 
     return jsonify({})
 
-@app.route('/resume/education', methods=['GET', 'POST'])
+@app.route('/resume/education', methods=['GET', 'POST', 'PUT'])
 def education():
     '''
     Handles education requests
@@ -162,6 +162,34 @@ def education():
         new_education_id = len(data["education"]) - 1
 
         return jsonify({"message": "Education added successfully ", "id": new_education_id}), 201
+
+    if request.method == 'PUT':
+        request_body = request.get_json()
+
+        if not request_body:
+            return jsonify({"error": "Request must be valid JSON"}), 400
+
+        if "id" not in request_body:
+            return jsonify({"error": "Missing required field: id"}), 400
+
+        education_id = request_body["id"]
+        if not isinstance(education_id, int):
+            return jsonify({"error": "Education ID must be an integer"}), 400
+
+        if not 0 <= education_id < len(data["education"]):
+            return jsonify({"error": "Education not found"}), 404
+
+        education_entry = data["education"][education_id]
+        updatable_fields = ("course", "school", "start_date",
+                            "end_date", "grade", "logo")
+        for field in updatable_fields:
+            if field in request_body:
+                setattr(education_entry, field, request_body[field])
+
+        return jsonify({
+            "message": "Education updated successfully",
+            "updated": education_entry.__dict__
+        }), 200
 
     return jsonify({})
 
