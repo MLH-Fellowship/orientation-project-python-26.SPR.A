@@ -93,7 +93,6 @@ def test_skill():
     response = app.test_client().get('/resume/skill')
     assert response.json[item_id] == example_skill
 
-
 def test_get_skill_by_index():
     '''
     Fetch a skill by its index via query parameter.
@@ -102,6 +101,44 @@ def test_get_skill_by_index():
     assert response.status_code == 200
     assert response.json['name'] == "Python"
     assert response.json['proficiency'] == "1-2 Years"
+
+
+def test_delete_education():
+    '''
+    Test deleting an education entry by index.
+    
+    Verifies that the education is deleted and returns appropriate response.
+    '''
+    from app import data
+    
+    # Store initial count
+    initial_count = len(data['education'])
+    
+    # Add a test education entry using POST
+    example_education = {
+        "course": "Test Course",
+        "school": "Test University",
+        "start_date": "January 2020",
+        "end_date": "December 2023",
+        "grade": "90%",
+        "logo": "test-logo.png"
+    }
+    app.test_client().post('/resume/education', json=example_education)
+    
+    # Get the index of the newly added education (last item)
+    index_to_delete = len(data['education']) - 1
+    
+    # Delete the education
+    response = app.test_client().delete(f'/resume/education/{index_to_delete}')
+    
+    # Check response
+    assert response.status_code == 200
+    assert response.json['message'] == 'Education deleted successfully'
+    assert response.json['deleted']['course'] == 'Test Course'
+    
+    # Verify the education was actually removed
+    assert len(data['education']) == initial_count
+
 
 def test_delete_education_invalid_index():
     '''
@@ -118,6 +155,7 @@ def test_delete_education_invalid_index():
     # Check that it returns 404
     assert response.status_code == 404
     assert response.json['error'] == 'Education not found'
+
 def test_delete_skill():
     '''
     Test deleting a skill by its index position.

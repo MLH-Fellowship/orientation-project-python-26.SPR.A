@@ -23,7 +23,6 @@ def validate_phone(phone):
 
 
 data = {
-    "personal_info": {},
     "experience": [
         Experience("Software Developer",
                    "A Cool Company",
@@ -108,22 +107,19 @@ def experience():
     Handle experience requests
     '''
     if request.method == 'GET':
-        experiences_as_dicts = [exp.__dict__ for exp in data["experience"]]
-        return jsonify(experiences_as_dicts)
+        return jsonify()
 
     if request.method == "POST":
         request_body = request.get_json()
         if not request_body:
             return jsonify({"error": "Request must be JSON or include form data"}), 400
 
-        logo = request_body.get("logo", "default-logo.png")
         new_experience = Experience(
             request_body["title"],
             request_body["company"],
             request_body["start_date"],
             request_body["end_date"],
             request_body["description"],
-            logo
         )
         data["experience"].append(new_experience)
 
@@ -139,8 +135,7 @@ def education():
     Handles education requests
     '''
     if request.method == 'GET':
-        education_as_dicts = [edu.__dict__ for edu in data["education"]]
-        return jsonify(education_as_dicts)
+        return jsonify({})
 
     if request.method == 'POST':
         request_body = request.get_json()
@@ -198,6 +193,7 @@ def skill():
             if 0 <= index < len(data["skill"]):
                 return jsonify(data["skill"][index].__dict__)
             return jsonify({"error": "Invalid skill ID"}), 400
+        
         skills_as_dicts = [skill.__dict__ for skill in data["skill"]]
         return jsonify(skills_as_dicts)
 
@@ -223,7 +219,7 @@ def skill():
         index = request.json.get('id')
         if index is not None and 0 <= index < len(data['skill']):
             deleted_skill = data['skill'].pop(index)
-            return jsonify({"message": "Skill deleted successfully"}), 200
+            return jsonify({"message": "Skill deleted successfully"}), 204
         return jsonify({"error": "Invalid skill ID"}), 400
 
     return jsonify({})
