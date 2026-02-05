@@ -171,3 +171,37 @@ def test_delete_skill():
     # Verify the skill was deleted by getting all skills
     response = app.test_client().get('/resume/skill')
     assert item_id not in response.json or response.json[item_id] != example_skill
+
+
+def test_update_skill_put():
+    '''
+    Update an existing skill using a PUT request and verify the change.
+    '''
+    # Create a skill to update
+    example_skill = {
+        "name": "Go",
+        "proficiency": "1 year",
+        "logo": "go-logo.png"
+    }
+    item_id = app.test_client().post('/resume/skill',
+                                     json=example_skill).json['id']
+
+    updated_skill = {
+        "id": item_id,
+        "name": "GoLang",
+        "proficiency": "2 years",
+        "logo": "updated-go-logo.png"
+    }
+
+    # Perform the update
+    update_response = app.test_client().put('/resume/skill',
+                                            json=updated_skill)
+    assert update_response.status_code == 200
+    assert update_response.json['message'] == "Skill updated successfully"
+    assert update_response.json['skill']['name'] == "GoLang"
+
+    # Confirm data was updated
+    skills_after_update = app.test_client().get('/resume/skill').json
+    assert skills_after_update[item_id]['name'] == "GoLang"
+    assert skills_after_update[item_id]['proficiency'] == "2 years"
+    assert skills_after_update[item_id]['logo'] == "updated-go-logo.png"
