@@ -116,6 +116,10 @@ def experience():
         if not request_body:
             return jsonify({"error": "Request must be JSON or include form data"}), 400
 
+        required = ["title", "company", "start_date", "end_date", "description"]
+        if not all(field in request_body for field in required):
+            return jsonify({"error": "Missing required fields"}), 400
+        
         new_experience = Experience(
             request_body["title"],
             request_body["company"],
@@ -155,6 +159,10 @@ def education():
         if not request_body:
             return jsonify({"error": "Request must be valid JSON"}), 400
 
+        required = ["course", "school", "start_date", "end_date", "grade"]
+        if not all(field in request_body for field in required):
+            return jsonify({"error": "Missing required fields"}), 400
+        
         try:
             new_education = Education(
                 request_body["course"],
@@ -214,6 +222,10 @@ def skill():
         if not request_body:
             return jsonify({"error": "Request must be JSON"}), 400
 
+        required = ["name", "proficiency", "logo"]
+        if not all(field in request_body for field in required):
+            return jsonify({"error": "Missing required fields"}), 400
+    
         try:
             new_skill = Skill(
                 request_body["name"],

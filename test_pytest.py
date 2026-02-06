@@ -278,3 +278,33 @@ def test_update_skill_put():
     assert skills_after_update[item_id]['name'] == "GoLang"
     assert skills_after_update[item_id]['proficiency'] == "2 years"
     assert skills_after_update[item_id]['logo'] == "updated-go-logo.png"
+
+def test_experience_missing_fields():
+    bad_payload = {
+        "title": "Dev"
+    }
+
+    response = app.test_client().post('/resume/experience', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json
+
+def test_education_missing_fields():
+    bad_payload = {
+        "course": "Engineering"
+    }
+
+    response = app.test_client().post('/resume/education', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json
+
+def test_skill_missing_fields():
+    bad_payload = {
+        "name": "Python"
+    }
+
+    response = app.test_client().post('/resume/skill', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json
