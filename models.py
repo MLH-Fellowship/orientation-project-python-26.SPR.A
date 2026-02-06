@@ -17,7 +17,7 @@ class Experience:
     start_date: str
     end_date: str
     description: str
-    logo: str = DEFAULT_LOGO
+    logo: str
 
 
 @dataclass

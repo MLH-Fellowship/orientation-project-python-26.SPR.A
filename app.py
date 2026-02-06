@@ -3,11 +3,14 @@ Flask Application
 '''
 from dataclasses import asdict
 import re
+import os
 from flask import Flask, jsonify, request
 from models import Experience, Education, Skill
 from dataclasses import asdict
 
 app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = "uploads"
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 ########### Helper functions ###########
 def validate_email(email):
@@ -109,25 +112,41 @@ def experience():
     Handle experience requests
     '''
     if request.method == 'GET':
-        return jsonify([asdict(exp) for exp in data["experience"]])
-
+        return jsonify(data["experience"])
     if request.method == "POST":
-        request_body = request.get_json()
-        if not request_body:
-            return jsonify({"error": "Request must be JSON or include form data"}), 400
+        if request.is_json:
+            request_body = request.get_json()
 
-        new_experience = Experience(
-            request_body["title"],
-            request_body["company"],
-            request_body["start_date"],
-            request_body["end_date"],
-            request_body["description"],
-        )
+            new_experience = Experience(
+                request_body["title"],
+                request_body["company"],
+                request_body["start_date"],
+                request_body["end_date"],
+                request_body["description"],
+                request_body.get("logo", "default-logo.png")
+            )
+        else:
+            request_body = request.form
+
+            logo_filename = "default-logo.png"
+            if "logo" in request.files:
+                logo_file = request.files["logo"]
+                logo_filename = logo_file.filename
+                logo_file.save(os.path.join(app.config["UPLOAD_FOLDER"], logo_filename))
+
+            new_experience = Experience(
+                request_body["title"],
+                request_body["company"],
+                request_body["start_date"],
+                request_body["end_date"],
+                request_body["description"],
+                logo_filename
+            )
+
         data["experience"].append(new_experience)
-
         new_experience_id = len(data["experience"]) - 1
 
-        return jsonify({"message": "Experience added successfully ", "id": new_experience_id}), 201
+        return jsonify({"id": new_experience_id}), 201
 
     return jsonify({})
 
