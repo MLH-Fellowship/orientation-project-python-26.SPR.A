@@ -125,10 +125,10 @@ def experience():
     if request.method == "POST":
         if request.is_json:
             request_body = request.get_json()
-
-            required = ["title", "company", "start_date", "end_date", "description"]
-            if (not validate_required_fields(request_body, required)):
-                return jsonify({"error": "Missing required fields"}), 400
+            
+        required = ["title", "company", "start_date", "end_date", "description"]
+        if (not validate_required_fields(request_body, required)):
+            return jsonify({"error": "Missing required fields"}), 400
 
             new_experience = Experience(
                 request_body["title"],
