@@ -24,6 +24,15 @@ def validate_phone(phone):
     if re.match(r'^\+[1-9]\d{7,14}$', phone):
         return True
     return False
+
+def validate_required_fields(body, required_fields):
+    '''
+    ensure request body contains all required fields
+    '''
+    missing = [field for field in required_fields if field not in body]
+    if missing:
+        return False
+    return True
 ########################################
 
 
@@ -74,7 +83,7 @@ def user_info():
             return jsonify({"error": "Invalid JSON"}), 400
 
         required = ("name", "email", "phone")
-        if not all(key in body for key in required):
+        if (not validate_required_fields(body, required)):
             return jsonify({"error": "Missing required fields"}), 400
 
         if not validate_email(body["email"]):
@@ -117,6 +126,10 @@ def experience():
         if request.is_json:
             request_body = request.get_json()
 
+            required = ["title", "company", "start_date", "end_date", "description"]
+            if (not validate_required_fields(request_body, required)):
+                return jsonify({"error": "Missing required fields"}), 400
+
             new_experience = Experience(
                 request_body["title"],
                 request_body["company"],
@@ -142,18 +155,6 @@ def experience():
                 request_body["description"],
                 logo_filename
             )
-
-        required = ["title", "company", "start_date", "end_date", "description"]
-        if not all(field in request_body for field in required):
-            return jsonify({"error": "Missing required fields"}), 400
-        
-        new_experience = Experience(
-            request_body["title"],
-            request_body["company"],
-            request_body["start_date"],
-            request_body["end_date"],
-            request_body["description"],
-        )
 
         data["experience"].append(new_experience)
         new_experience_id = len(data["experience"]) - 1
@@ -211,7 +212,7 @@ def education():
             return jsonify({"error": "Request must be valid JSON"}), 400
 
         required = ["course", "school", "start_date", "end_date", "grade"]
-        if not all(field in request_body for field in required):
+        if (not validate_required_fields(request_body, required)):
             return jsonify({"error": "Missing required fields"}), 400
         
         try:
@@ -274,7 +275,7 @@ def skill():
             return jsonify({"error": "Request must be JSON"}), 400
 
         required = ["name", "proficiency", "logo"]
-        if not all(field in request_body for field in required):
+        if (not validate_required_fields(request_body, required)):
             return jsonify({"error": "Missing required fields"}), 400
     
         try:
