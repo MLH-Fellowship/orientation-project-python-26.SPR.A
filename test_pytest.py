@@ -86,6 +86,27 @@ def test_education():
     assert response.json[item_id] == example_education
 
 
+def test_education_by_index():
+    '''
+    Add a new education and then get the added education. 
+    
+    Check that it returns the new education
+    '''
+    example_education = {
+        "course": "Engineering",
+        "school": "NYU",
+        "start_date": "October 2022",
+        "end_date": "August 2024",
+        "grade": "86%",
+        "logo": "example-logo.png"
+    }
+    item_id = app.test_client().post('/resume/education',
+                                     json=example_education).json['id']
+
+    response = app.test_client().get('/resume/education', query_string={'id': item_id})
+    assert response.get_json() == example_education
+
+
 def test_skill():
     '''
     Add a new skill and then get all skills. 
