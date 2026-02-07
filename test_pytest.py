@@ -177,6 +177,8 @@ def test_delete_experience():
     Test deleting an experience entry by index.
     
     Verifies that the experience is deleted and returns appropriate response.
+    '''
+
 def test_delete_education_invalid_index():
     '''
     Test deleting an education with an invalid index.
@@ -233,6 +235,7 @@ def test_delete_education():
 def test_delete_experience_invalid_index():
     '''
     Test deleting an experience with an invalid index.
+    '''
     initial_count = len(data['education'])
     
     # Add a test education entry using POST
@@ -341,3 +344,33 @@ def test_update_skill_put():
     assert skills_after_update[item_id]['name'] == "GoLang"
     assert skills_after_update[item_id]['proficiency'] == "2 years"
     assert skills_after_update[item_id]['logo'] == "updated-go-logo.png"
+
+def test_experience_missing_fields():
+    bad_payload = {
+        "title": "Dev"
+    }
+
+    response = app.test_client().post('/resume/experience', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json
+
+def test_education_missing_fields():
+    bad_payload = {
+        "course": "Engineering"
+    }
+
+    response = app.test_client().post('/resume/education', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json
+
+def test_skill_missing_fields():
+    bad_payload = {
+        "name": "Python"
+    }
+
+    response = app.test_client().post('/resume/skill', json=bad_payload)
+
+    assert response.status_code == 400
+    assert "error" in response.json

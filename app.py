@@ -24,6 +24,15 @@ def validate_phone(phone):
     if re.match(r'^\+[1-9]\d{7,14}$', phone):
         return True
     return False
+
+def validate_required_fields(body, required_fields):
+    '''
+    ensure request body contains all required fields
+    '''
+    missing = [field for field in required_fields if field not in body]
+    if missing:
+        return False
+    return True
 ########################################
 
 
@@ -74,7 +83,7 @@ def user_info():
             return jsonify({"error": "Invalid JSON"}), 400
 
         required = ("name", "email", "phone")
-        if not all(key in body for key in required):
+        if (not validate_required_fields(body, required)):
             return jsonify({"error": "Missing required fields"}), 400
 
         if not validate_email(body["email"]):
@@ -116,6 +125,10 @@ def experience():
     if request.method == "POST":
         if request.is_json:
             request_body = request.get_json()
+            
+        required = ["title", "company", "start_date", "end_date", "description"]
+        if (not validate_required_fields(request_body, required)):
+            return jsonify({"error": "Missing required fields"}), 400
 
             new_experience = Experience(
                 request_body["title"],
@@ -165,6 +178,7 @@ def delete_experience(index):
         return jsonify({'error': 'Experience not found'}), 404
     except IndexError:
         return jsonify({'error': 'Experience not found'}), 404
+    
 @app.route('/resume/experience/<int:exp_id>', methods=['GET'])
 def get_experience(exp_id):
     '''
@@ -197,6 +211,10 @@ def education():
         if not request_body:
             return jsonify({"error": "Request must be valid JSON"}), 400
 
+        required = ["course", "school", "start_date", "end_date", "grade"]
+        if (not validate_required_fields(request_body, required)):
+            return jsonify({"error": "Missing required fields"}), 400
+        
         try:
             new_education = Education(
                 request_body["course"],
@@ -256,6 +274,10 @@ def skill():
         if not request_body:
             return jsonify({"error": "Request must be JSON"}), 400
 
+        required = ["name", "proficiency", "logo"]
+        if (not validate_required_fields(request_body, required)):
+            return jsonify({"error": "Missing required fields"}), 400
+    
         try:
             new_skill = Skill(
                 request_body["name"],
